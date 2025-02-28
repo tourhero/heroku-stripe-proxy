@@ -1,12 +1,15 @@
-const bodyParser = require('body-parser');
-const express = require('express');
-const config = require('./lib/config');
-const stripe = require('stripe')(config.stripeSecretKey);
-const { proxyWebhookRequest } = require('./lib/proxy');
+import bodyParser from 'body-parser';
+import express from 'express'
+import Stripe from 'stripe';
+import { config } from './lib/config.js';
+import { proxyStripeWebhookRequest } from './lib/stripeProxy.js'
+import { validateFrontRequest, proxyFrontWebhookRequest } from './lib/front/frontProxy.js'
 
 const app = express();
 
-app.post('/webhook', bodyParser.raw({type: 'application/json'}), (request, response) => {
+const stripe = new Stripe(config.stripeSecretKey);
+
+app.post('/webhook', bodyParser.raw({ type: 'application/json' }), (request, response) => {
     // verify webhook request
     if (config.stripeVerifyWebhookSignature) {
         const signature = request.headers['stripe-signature'];
@@ -24,10 +27,22 @@ app.post('/webhook', bodyParser.raw({type: 'application/json'}), (request, respo
     }
 
     // proxy request if valid
-    proxyWebhookRequest(request);
+    proxyStripeWebhookRequest(request);
 
     // immediately return 200 to Stripe
     response.sendStatus(200);
+});
+
+app.post('/webhooks/front', bodyParser.json(), async (request, response) => {
+    // verify webhook request
+    if (!validateFrontRequest(request)) {
+        response.sendStatus(400).json({ type: 'bad_request', message: 'Signature not verified' });
+    }
+
+    // proxy request if valid
+    const { json, status } = await proxyFrontWebhookRequest(request);
+
+    response.status(status).json(json);
 });
 
 app.listen(config.port, () => console.log(`Proxy listening for requests on port: ${config.port}`));
