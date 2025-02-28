@@ -1,6 +1,7 @@
 {
   "name": "stripe-webhook-proxy",
   "version": "1.0.0",
+  "type": "module",
   "description": "Proxy webhook events from Stripe to Mariana review apps on Heroku",
   "main": "index.js",
   "scripts": {
