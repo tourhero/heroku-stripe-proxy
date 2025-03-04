@@ -33,7 +33,7 @@ app.post('/webhook', bodyParser.raw({ type: 'application/json' }), (request, res
     response.sendStatus(200);
 });
 
-app.post('/webhooks/front', bodyParser.json(), async (request, response) => {
+app.post('/webhook_front', bodyParser.json(), async (request, response) => {
     // verify webhook request
     if (!validateFrontRequest(request)) {
         response.sendStatus(400).json({ type: 'bad_request', message: 'Signature not verified' });
