@@ -1,5 +1,6 @@
 {
-"name": "Heroku Stripe Proxy",
+  "name": "Heroku Stripe Proxy",
+  "stack": "heroku-24",
   "description": "Forward Stripe event webhooks to all review apps in a Heroku pipeline",
   "keywords": [
     "stripe",
